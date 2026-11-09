@@ -1,0 +1,75 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit:
+    name: 单测 + ReAct demo
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 安装依赖
+        run: pip install -r requirements.txt
+
+      - name: pytest 参数化单测
+        run: |
+          mkdir -p reports
+          python -m pytest --junitxml=reports/junit.xml
+
+      - name: 最小 ReAct 循环（离线模式，验证工具调用链路）
+        run: python ai/react_loop.py
+
+      - name: 上传单测报告
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-report
+          path: reports/
+          retention-days: 14
+
+  e2e:
+    name: Playwright E2E
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: 安装 npm 依赖（有 lock 文件就用 ci，保证可复现）
+        run: |
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+
+      - name: 安装 Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: 跑 E2E（webServer 会自动拉起被测服务）
+        run: npx playwright test
+
+      - name: 上传 Playwright 报告与失败现场
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            reports/
+            test-results/
+          retention-days: 14
