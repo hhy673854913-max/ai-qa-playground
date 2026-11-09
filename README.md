@@ -30,7 +30,14 @@ npm ci                    # 有 package-lock.json，安装结果可复现
 npx playwright install chromium
 npm run test:e2e          # webServer 会自动拉起被测服务，不用手动开
 npm run report            # 打开 HTML 报告：报告里有截图、trace、用例耗时
+
+# 4) Midscene（可选：自然语言驱动 UI，需要多模态模型 Key）
+cd tests/e2e-midscene && npm ci
+powershell -File run-local.ps1 -KeyFile ..\..\..\.key    # Key 只进环境变量，不落盘
 ```
+
+> Midscene 默认配置走阿里云百炼：`qwen3-vl-plus` + `MIDSCENE_MODEL_FAMILY=qwen3-vl`。
+> 换别的模型只要改 `run-local.ps1` 的 `-Model / -BaseUrl / -Family` 三个参数。
 
 Windows 上如果 `python` 指向 Microsoft Store 的占位程序，用 `py -3.12`，并在跑 E2E 时指定
 `$env:GAME_PYTHON="py"`。
@@ -107,8 +114,11 @@ ai-qa-playground/
 | 被测服务 + H5 页面 | ✅ 本机实跑（`/health`、`/api/draw`、`/api/leaderboard` 全验证） |
 | `ai/react_loop.py` 离线模式 | ✅ 本机实跑（3 轮 Thought/Action/Observation，工具真调用）+ CI 绿 |
 | `tests/e2e`（Playwright 14 条） | ✅ 本机实跑 13 passed / 1 skipped（Chromium，Desktop + Pixel 7）+ CI 绿 |
-| GitHub Actions | ✅ 首次 push 后两个 job 全绿（单测 job 44s，E2E job 含 Chromium 安装） |
-| `tests/e2e-midscene` | ⚠️ 需多模态模型 API Key，**未实跑**；API 以 Midscene 官方文档为准（见该目录 README） |
+| `tests/e2e-midscene`（2 条） | ✅ 本机实跑 2 passed（DashScope `qwen3-vl-plus`，13.8s + 10.3s），需要自己的 Key |
+| GitHub Actions | ✅ 两个 job 全绿（单测 / E2E）；把仓库变量 `ENABLE_MIDSCENE` 设为 `true` 并配好 secret 后，会额外跑 Midscene job |
+
+关于 Midscene：Anthropic/OpenAI 官方的「computer use」类方案在这里都用不上（本机可达的是阿里云百炼），
+所以按 Midscene 1.17 的实际配置走 `MIDSCENE_MODEL_FAMILY=qwen3-vl` + `qwen3-vl-plus`，实测可直接驱动页面。
 
 截图来自 E2E 用例的 `testInfo.attach`（`docs/preview.png` 为桌面端，`docs/preview-mobile.png` 为 Pixel 7 视口），
 不是手工截的图 —— README 里的每一张图都能被测试重新生成。

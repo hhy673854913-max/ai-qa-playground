@@ -13,3 +13,7 @@ __pycache__/
 .env.local
 
 debug.log
+
+midscene_run/
+*.key
+key.txt

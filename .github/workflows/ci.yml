@@ -73,3 +73,47 @@ jobs:
             reports/
             test-results/
           retention-days: 14
+
+  # 可选 job：把仓库变量 ENABLE_MIDSCENE 设为 true 才会触发。
+  # 为什么不直接用 secrets 判断？GitHub 的 job 级 if 不提供 secrets 上下文，
+  # 用 vars 开关 + secrets 传值才是能跑通的组合。不开启就一直跳过，主流程不受影响。
+  midscene:
+    name: Midscene 自然语言 E2E（可选）
+    runs-on: ubuntu-latest
+    if: ${{ vars.ENABLE_MIDSCENE == 'true' }}
+    env:
+      MIDSCENE_MODEL_API_KEY: ${{ secrets.MIDSCENE_MODEL_API_KEY }}
+      MIDSCENE_MODEL_BASE_URL: ${{ vars.MIDSCENE_MODEL_BASE_URL || 'https://dashscope.aliyuncs.com/compatible-mode/v1' }}
+      MIDSCENE_MODEL_NAME: ${{ vars.MIDSCENE_MODEL_NAME || 'qwen3-vl-plus' }}
+      MIDSCENE_MODEL_FAMILY: ${{ vars.MIDSCENE_MODEL_FAMILY || 'qwen3-vl' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: 安装 Midscene 依赖
+        working-directory: tests/e2e-midscene
+        run: npm ci
+
+      - name: 安装 Chromium
+        working-directory: tests/e2e-midscene
+        run: npx playwright install --with-deps chromium
+
+      - name: 跑 Midscene 用例（webServer 自动起服务）
+        working-directory: tests/e2e-midscene
+        run: npx playwright test --config=playwright.config.js
+
+      - name: 上传 Midscene 报告（含每步截图与模型原始响应）
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: midscene-report
+          path: tests/e2e-midscene/midscene_run/
+          retention-days: 14
+
