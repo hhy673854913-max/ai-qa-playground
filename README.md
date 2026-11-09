@@ -44,6 +44,24 @@ Windows 上如果 `python` 指向 Microsoft Store 的占位程序，用 `py -3.1
 
 ---
 
+## 学习手册（14 天 × 每天 1 小时）
+
+不知道怎么读这个仓库？[**docs/handbook/**](docs/handbook/README.md) 给了一条按天排好的路线：
+
+| 阶段 | 天 | 内容 |
+| --- | --- | --- |
+| 打地基 | Day 01-03 | 跑通三条链路 → 读被测服务 → 读懂抽奖算法 |
+| 单测 | Day 04-06 | 参数化、用例设计、排序细节（每天都要"改坏一次再修回来"） |
+| 复盘 | Day 07 | 自测 10 题 + 把产出提成 PR |
+| E2E | Day 08-11 | 定位器与等待 → 写第一条用例 → 状态隔离 → 移动端 |
+| AI + CI | Day 12-14 | Midscene 实测对比 → GitHub Actions → 给 ReAct 循环加工具 |
+| 面试 | Day 15 | STAR 稿 + 10 个追问 + 3 个反问 |
+
+每天 60 分钟 = 读 25 + 练 30 + 记 5，产出写进 [progress.md](docs/handbook/progress.md)。
+手册里的每条命令、每个"期望输出"都在这个仓库里实跑过。
+
+---
+
 ## 目录结构
 
 ```
@@ -66,6 +84,7 @@ ai-qa-playground/
 ├─ ai/
 │  └─ react_loop.py          # 最小 ReAct / Function Calling 循环（约 60 行核心逻辑）
 ├─ docs/
+│  ├─ handbook/              # 14 天学习手册（每天 1 小时，含验收清单与面试口径）
 │  ├─ ai-ui-automation.md    # 传统 vs AI 自动化：各脆在哪、怎么组合
 │  └─ metrics.md             # 采纳率 / 返工率 / 交付周期：口径 + 话术
 ├─ .github/workflows/ci.yml  # 单测 job + E2E job + 报告 artifact
