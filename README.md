@@ -1,12 +1,16 @@
 # ai-qa-playground
 
+[![ci](https://github.com/hhy673854913-max/ai-qa-playground/actions/workflows/ci.yml/badge.svg)](https://github.com/hhy673854913-max/ai-qa-playground/actions/workflows/ci.yml)
+
 一个把「测开」四件事串起来的练习仓库：**Playwright E2E**、**Midscene.js（AI 驱动 UI）**、**pytest 参数化单测**、**最小 ReAct / Function Calling 循环**，外加一份把 AI 提效翻译成质量语言的 [metrics 口径](docs/metrics.md)。
 
 被测对象是一个自己写的 H5 抽奖小游戏（抽奖 + 排行榜），所以整条链路是完整的：
 **业务代码 → 单测 → E2E → CI → 报告**，不是拿一堆孤立的 Hello World 拼凑。
 
+![抽奖页截图](docs/preview.png)
+
 ```
-pytest 40 条单测：0.2s       Playwright 用例：桌面 + 移动双 project      ReAct demo：离线可跑，无需 API Key
+pytest 40 条单测：0.2s       Playwright 14 条用例：桌面 + 移动双 project（13 passed / 1 skipped）
 ```
 
 ---
@@ -22,7 +26,7 @@ python -m pytest -v
 python ai/react_loop.py
 
 # 3) E2E（需要 Node）
-npm install
+npm ci                    # 有 package-lock.json，安装结果可复现
 npx playwright install chromium
 npm run test:e2e          # webServer 会自动拉起被测服务，不用手动开
 npm run report            # 打开 HTML 报告：报告里有截图、trace、用例耗时
@@ -99,15 +103,15 @@ ai-qa-playground/
 
 | 部分 | 状态 |
 | --- | --- |
-| `pytest` 单测（40 条） | ✅ 实跑通过（Python 3.12，0.2s） |
-| 被测服务 + H5 页面 | ✅ 实跑通过（`/health`、`/api/draw`、`/api/leaderboard` 均已验证） |
-| `ai/react_loop.py` 离线模式 | ✅ 实跑通过（3 轮 Thought/Action/Observation，含真实工具调用） |
-| `tests/e2e`（Playwright） | ⚠️ 代码已写完，但作者环境无外网、装不了浏览器，**未在本机实跑** |
-| `tests/e2e-midscene` | ⚠️ 需模型 Key，未实跑；API 以 Midscene 官方文档为准（见该目录 README） |
-| GitHub Actions | ⚠️ 尚未在真实仓库跑过，首次 push 后请确认两个 job 都绿 |
+| `pytest` 单测（40 条） | ✅ 本机实跑（Python 3.12，0.2s）+ CI 绿 |
+| 被测服务 + H5 页面 | ✅ 本机实跑（`/health`、`/api/draw`、`/api/leaderboard` 全验证） |
+| `ai/react_loop.py` 离线模式 | ✅ 本机实跑（3 轮 Thought/Action/Observation，工具真调用）+ CI 绿 |
+| `tests/e2e`（Playwright 14 条） | ✅ 本机实跑 13 passed / 1 skipped（Chromium，Desktop + Pixel 7）+ CI 绿 |
+| GitHub Actions | ✅ 首次 push 后两个 job 全绿（单测 job 44s，E2E job 含 Chromium 安装） |
+| `tests/e2e-midscene` | ⚠️ 需多模态模型 API Key，**未实跑**；API 以 Midscene 官方文档为准（见该目录 README） |
 
-第一次 push 之后，建议先手动 `workflow_dispatch` 跑一次，把 E2E job 的 Playwright 版本、
-Chromium 下载、`python -m game.server` 启动链路都验证掉，再把 CI 徽章贴到 README 顶部。
+截图来自 E2E 用例的 `testInfo.attach`（`docs/preview.png` 为桌面端，`docs/preview-mobile.png` 为 Pixel 7 视口），
+不是手工截的图 —— README 里的每一张图都能被测试重新生成。
 
 ---
 
@@ -115,7 +119,8 @@ Chromium 下载、`python -m game.server` 启动链路都验证掉，再把 CI �
 
 - 服务状态在内存里，重启即清空（够用，但不要当生产模板）。
 - 没有数据库、没有登录态、没有多用户隔离 —— 这些会在真实项目里出现，见下一节。
-- Midscene 依赖 `latest` 版本，第一次 `npm install` 后请把 `package-lock.json` 提交上来锁版本。
+- 根目录的 `@playwright/test` 已用 `package-lock.json` 锁版本；`tests/e2e-midscene` 仍是独立依赖，
+  第一次 `npm install` 后请把它自己的 lock 也提交上来。
 
 ## 如果继续做，下一步
 
