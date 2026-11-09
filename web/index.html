@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI QA Playground · 抽奖小游戏</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="aurora" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">🎁</span>
+      <div>
+        <h1>幸运抽奖机</h1>
+        <p class="subtitle">AI QA Playground · Playwright / Midscene 练习靶场</p>
+      </div>
+    </div>
+    <div class="player" id="player-badge" title="当前玩家">guest</div>
+  </header>
+
+  <main class="layout">
+    <section class="card stage">
+      <div class="stage-inner">
+        <div class="orb" id="orb">
+          <span class="orb-icon" id="prize-icon">❔</span>
+        </div>
+        <p class="prize-name" id="prize-name" data-prize="">准备好了吗？</p>
+        <p class="prize-meta" id="prize-meta">点击下方按钮开始抽奖</p>
+        <button class="draw-btn" id="draw-btn" type="button">抽一次</button>
+        <p class="draw-count">已抽 <strong id="draw-count">0</strong> 次</p>
+      </div>
+    </section>
+
+    <aside class="side">
+      <section class="card">
+        <h2>最近抽奖</h2>
+        <ul class="history" id="history">
+          <li class="empty">还没有记录，先抽一次吧</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>排行榜 <span class="hint">Top 5</span></h2>
+        <ol class="leaderboard" id="leaderboard">
+          <li class="empty">暂无上榜玩家</li>
+        </ol>
+      </section>
+
+      <section class="card">
+        <h2>奖池概率</h2>
+        <ul class="odds" id="odds"></ul>
+      </section>
+    </aside>
+  </main>
+
+  <footer class="footer">
+    <span>seed: <code id="seed-label">-</code></span>
+    <span>同一 seed 下结果可复现，方便 E2E 断言具体奖品</span>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>
